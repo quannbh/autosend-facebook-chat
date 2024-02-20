@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gửi Tin Nhắn Facebook</title>
+    <link rel="shortcut icon" href="#"/>
+
+    <style>
+        .loader {
+            border: 4px solid rgba(0, 0, 0, 0.3);
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Gửi Tin Nhắn Facebook</h1>
+    <form id="messageForm">
+        <label for="email">Email Facebook:</label>
+        <input type="text" id="email" name="email" required><br>
+
+        <label for="password">Mật khẩu Facebook:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <label for="recipient_id">ID Người Nhận (phân tách bằng dấu phẩy, ví dụ: 123,456,789):</label>
+        <br>
+        <input type="text" id="recipient_id" name="recipient_id" required><br>
+
+        <label for="message">Nội Dung Tin Nhắn (phân tách bằng dấu xuống dòng):</label>
+        <br>
+        <textarea id="message" name="message" rows="4" required></textarea><br>
+
+        <input type="submit" value="Gửi Tin Nhắn">
+        <div id="loader" class="loader" style="display:none;"></div>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById("messageForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Ngăn chặn gửi form tự động
+
+            // Ẩn nút Gửi Tin Nhắn và hiển thị biểu tượng xoay tròn
+            document.querySelector('input[type="submit"]').style.display = "none";
+            document.getElementById("loader").style.display = "inline-block";
+
+            // Lấy giá trị các trường trong form
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
+            var recipientIds = document.getElementById("recipient_id").value.split(",");
+            var messages = document.getElementById("message").value.split("\n");
+
+            // Gửi tin nhắn bằng AJAX
+            sendMessages(email, password, recipientIds, messages);
+        });
+
+        function sendMessages(email, password, recipientIds, messages) {
+            var index = 0;
+            var formData = new FormData();
+
+            function sendMessage() {
+                if (index >= messages.length) {
+                    // Redirect tới trang thành công sau khi hoàn thành tin nhắn
+                    window.location.href = "/success";
+                    return;
+                }
+
+                formData.set("email", email);
+                formData.set("password", password);
+                formData.set("recipient_id", recipientIds.join(","));
+                formData.set("message", messages[index]);
+
+                fetch("/gui_tin_nhan", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data); // Log kết quả gửi tin nhắn (có thể không cần thiết)
+                    document.getElementById("result").innerText = data;
+                    index += 1;
+                    sendMessage(); // Gửi tin nhắn tiếp theo
+                })
+                .catch(error => {
+                    console.error("Lỗi khi gửi tin nhắn:", error);
+                    document.getElementById("result").innerText = "Có lỗi xảy ra khi gửi tin nhắn.";
+                    // Ẩn biểu tượng xoay tròn và hiển thị lại nút Gửi Tin Nhắn
+                    document.querySelector('input[type="submit"]').style.display = "inline-block";
+                    document.getElementById("loader").style.display = "none";
+                });
+            }
+
+            sendMessage();
+        }
+    </script>
+</body>
+</html>
