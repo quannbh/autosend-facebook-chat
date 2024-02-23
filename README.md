@@ -8,5 +8,5 @@ To send multiple messages: enter the message content in the message box, differe
 
 #### Notice: To make it work, you need to pip install package fbchat to your device and change the value of the 190th line in the __state.py file to 1. Another choice, you can import my 'myfbchatqt' library for quick use and no error. 
 
-## Require: 
+## Require
 ``$pip install flask`` 
